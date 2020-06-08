@@ -1,0 +1,57 @@
+Parameters:
+  ProjectName:
+    Type: String
+    Description: Project name to link stacks
+    Default: am-multi-account
+
+  VPC:
+    Description: VPC shared from the primary account
+    Type: String
+
+Resources:
+  NodesSDPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Action: ['servicediscovery:UpdateInstanceCustomHealthStatus']
+          Resource: '*'
+        - Effect: Allow
+          Action: ['servicediscovery:GetInstancesHealthStatus']
+          Resource: '*'
+        - Effect: Allow
+          Action: ['servicediscovery:GetOperation']
+          Resource: '*'
+
+  AppServerServiceDiscoveryNamespace:
+    Type: AWS::ServiceDiscovery::PrivateDnsNamespace
+    Properties:
+      Name: !Sub '${ProjectName}.local'
+      Vpc: !Ref VPC
+
+  BackendRegistry:
+    Type: AWS::ServiceDiscovery::Service
+    Properties:
+      Name: 'yelb-appserver'
+      DnsConfig:
+        NamespaceId: !Ref AppServerServiceDiscoveryNamespace
+        DnsRecords:
+        - Type: A
+          TTL: 300
+      HealthCheckCustomConfig:
+        FailureThreshold: 1
+
+Outputs:
+  NodesSDPolicy:
+    Description: IAM Policy that will be added to the EKS nodes
+    Value:  !Ref NodesSDPolicy
+    Export: 
+      Name: !Sub '${ProjectName}:NodesSDPolicy'
+
+  AppServerServiceDiscoveryNamespace:
+    Description: A SDS namespace that will be used by appserver
+    Value:  !Ref AppServerServiceDiscoveryNamespace
+    Export: 
+      Name: !Sub '${ProjectName}:AppServerServiceDiscoveryNamespace'

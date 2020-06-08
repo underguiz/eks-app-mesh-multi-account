@@ -1,0 +1,9 @@
+apiVersion: appmesh.k8s.aws/v1beta2
+kind: Mesh
+metadata:
+  name: am-multi-account-mesh
+spec:
+  meshOwner: "892921042686"
+  namespaceSelector:
+    matchLabels:
+      mesh: am-multi-account-mesh
