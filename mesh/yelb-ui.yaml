@@ -15,10 +15,10 @@ spec:
   serviceDiscovery:
     dns:
       hostname: yelb-ui.yelb.svc.cluster.local
-#   backends:
-#     - virtualService:
-#        virtualServiceRef:
-#           name: yelb-appserver
+  backends:
+    - virtualService:
+       virtualServiceARN: arn:aws:appmesh:us-west-2:265506693770:mesh/am-multi-account-mesh@892921042686/virtualService/yelb-appserver.am-multi-account.local
+
 ---
 apiVersion: appmesh.k8s.aws/v1beta2
 kind: VirtualService
