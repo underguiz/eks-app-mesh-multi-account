@@ -53,11 +53,6 @@ aws --profile primary cloudformation deploy \
 kubectl config use-context gfvieira@am-multi-account-1.us-west-2.eksctl.io
 ```
 
-<!--```
-kubectl apply -f \
-https://raw.githubusercontent.com/M00nF1sh/aws-app-mesh-controller-for-k8s/v1beta2_bugbash/config/samples/crd.yaml
-```-->
-
 ```
 kubectl apply --validate=false -f \
 https://github.com/jetstack/cert-manager\
@@ -100,10 +95,6 @@ aws --profile primary cloudformation deploy \
 ```
 kubectl config use-context gfvieira@am-multi-account-2.us-west-2.eksctl.io
 ```
-
-<!--```
-kubectl apply -f https://raw.githubusercontent.com/M00nF1sh/aws-app-mesh-controller-for-k8s/v1beta2_bugbash/config/samples/crd.yaml
-```-->
 
 ```
 kubectl apply --validate=false -f \
