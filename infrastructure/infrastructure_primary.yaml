@@ -34,6 +34,9 @@ Parameters:
     Type: String
     Default: 10.192.21.0/24
 
+  SecondaryAccountId:
+    Type: String
+
 Resources:
 
   VPC:
@@ -155,7 +158,6 @@ Resources:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref PublicSubnet2
 
-
   PrivateRouteTable1:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -198,7 +200,6 @@ Resources:
       RouteTableId: !Ref PrivateRouteTable2
       SubnetId: !Ref PrivateSubnet2
 
-
   NodesSDPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
@@ -208,6 +209,26 @@ Resources:
         - Effect: Allow
           Action: ['servicediscovery:UpdateInstanceCustomHealthStatus']
           Resource: '*'
+
+  VPCPeerRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Principal:
+              AWS: !Ref SecondaryAccountId
+            Action:
+              - 'sts:AssumeRole'
+            Effect: Allow
+      Path: /
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: 'ec2:AcceptVpcPeeringConnection'
+                Resource: '*'
 
 Outputs:
   VPC:
@@ -242,6 +263,16 @@ Outputs:
     Export: 
       Name: !Sub '${ProjectName}:PrivateSubnet1'
 
+  PrivateRouteTable1:
+    Value: !Ref PrivateRouteTable1
+    Export:
+      Name: !Sub '${ProjectName}:PrivateRouteTable1'
+
+  PrivateRouteTable2:
+    Value: !Ref PrivateRouteTable2
+    Export:
+      Name: !Sub '${ProjectName}:PrivateRouteTable2'
+
   PrivateSubnet2:
     Description: A reference to the private subnet in the 2nd Availability Zone
     Value: !Ref PrivateSubnet2
@@ -253,3 +284,10 @@ Outputs:
     Value:  !Ref NodesSDPolicy
     Export: 
       Name: !Sub '${ProjectName}:NodesSDPolicy'
+
+  VPCPeerRole:
+    Value: !GetAtt 
+      - VPCPeerRole
+      - Arn
+    Export: 
+        Name: !Sub '${ProjectName}:VPCPeerRole'

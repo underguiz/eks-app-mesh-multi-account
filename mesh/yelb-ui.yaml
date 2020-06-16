@@ -4,7 +4,6 @@ metadata:
   name: yelb-ui
   namespace: yelb
 spec:
-  awsName: yelb-ui-virtual-node
   podSelector:
     matchLabels:
       app: yelb-ui
@@ -17,7 +16,7 @@ spec:
       hostname: yelb-ui.yelb.svc.cluster.local
   backends:
     - virtualService:
-       virtualServiceARN: arn:aws:appmesh:us-west-2:265506693770:mesh/am-multi-account-mesh@892921042686/virtualService/yelb-appserver.am-multi-account.local
+       virtualServiceARN: arn:aws:appmesh:us-west-2:949391575616:mesh/am-multi-account-mesh@894953046865/virtualService/yelb-appserver
 
 ---
 apiVersion: appmesh.k8s.aws/v1beta2

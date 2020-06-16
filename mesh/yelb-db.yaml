@@ -4,14 +4,13 @@ metadata:
   name: yelb-db
   namespace: yelb
 spec:
-  awsName: yelb-db-virtual-node
   podSelector:
     matchLabels:
       app: yelb-db
   listeners:
     - portMapping:
         port: 5432
-        protocol: tcp  
+        protocol: tcp
   serviceDiscovery:
     dns:
       hostname: yelb-db.yelb.svc.cluster.local

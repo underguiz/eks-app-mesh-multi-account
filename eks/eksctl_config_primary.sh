@@ -2,15 +2,15 @@
 
 # Create a ClusterConfig file
 AWS_REGION="us-west-2"
-PRIVSUB1_ID=$(aws --profile primary cloudformation list-exports | jq -r '.Exports[] | select(.Name=="am-multi-account:PrivateSubnet1") | .Value');
-PRIVSUB2_ID=$(aws --profile primary cloudformation list-exports | jq -r '.Exports[] | select(.Name=="am-multi-account:PrivateSubnet2") | .Value');
-PUBSUB1_ID=$(aws --profile primary cloudformation list-exports | jq -r '.Exports[] | select(.Name=="am-multi-account:PublicSubnet1") | .Value');
-PUBSUB2_ID=$(aws --profile primary cloudformation list-exports | jq -r '.Exports[] | select(.Name=="am-multi-account:PublicSubnet2") | .Value');
-PRIVSUB1_AZ=$(aws --profile primary ec2 describe-subnets --subnet-ids $PRIVSUB1_ID | jq -r .Subnets[].AvailabilityZone);
-PRIVSUB2_AZ=$(aws --profile primary ec2 describe-subnets --subnet-ids $PRIVSUB2_ID | jq -r .Subnets[].AvailabilityZone);
-PUBSUB1_AZ=$(aws --profile primary ec2 describe-subnets --subnet-ids $PUBSUB1_ID | jq -r .Subnets[].AvailabilityZone);
-PUBSUB2_AZ=$(aws --profile primary ec2 describe-subnets --subnet-ids $PUBSUB2_ID | jq -r .Subnets[].AvailabilityZone);
-NODES_IAM_POLICY=$(aws --profile primary cloudformation list-exports | jq -r '.Exports[] | select(.Name=="am-multi-account:NodesSDPolicy") | .Value');
+PRIVSUB1_ID=$(aws --profile primary-vpcp cloudformation list-exports | jq -r '.Exports[] | select(.Name=="am-multi-account:PrivateSubnet1") | .Value');
+PRIVSUB2_ID=$(aws --profile primary-vpcp cloudformation list-exports | jq -r '.Exports[] | select(.Name=="am-multi-account:PrivateSubnet2") | .Value');
+PUBSUB1_ID=$(aws --profile primary-vpcp cloudformation list-exports | jq -r '.Exports[] | select(.Name=="am-multi-account:PublicSubnet1") | .Value');
+PUBSUB2_ID=$(aws --profile primary-vpcp cloudformation list-exports | jq -r '.Exports[] | select(.Name=="am-multi-account:PublicSubnet2") | .Value');
+PRIVSUB1_AZ=$(aws --profile primary-vpcp ec2 describe-subnets --subnet-ids $PRIVSUB1_ID | jq -r .Subnets[].AvailabilityZone);
+PRIVSUB2_AZ=$(aws --profile primary-vpcp ec2 describe-subnets --subnet-ids $PRIVSUB2_ID | jq -r .Subnets[].AvailabilityZone);
+PUBSUB1_AZ=$(aws --profile primary-vpcp ec2 describe-subnets --subnet-ids $PUBSUB1_ID | jq -r .Subnets[].AvailabilityZone);
+PUBSUB2_AZ=$(aws --profile primary-vpcp ec2 describe-subnets --subnet-ids $PUBSUB2_ID | jq -r .Subnets[].AvailabilityZone);
+NODES_IAM_POLICY=$(aws --profile primary-vpcp cloudformation list-exports | jq -r '.Exports[] | select(.Name=="am-multi-account:NodesSDPolicy") | .Value');
 
 cat > /tmp/eks-1-configuration.yml <<-EKS_CONF
   apiVersion: eksctl.io/v1alpha5
@@ -48,4 +48,4 @@ cat > /tmp/eks-1-configuration.yml <<-EKS_CONF
 EKS_CONF
 
 # Create the EKS cluster
-eksctl create -p primary cluster -f /tmp/eks-1-configuration.yml
+eksctl create -p primary-vpcp cluster -f /tmp/eks-1-configuration.yml

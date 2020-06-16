@@ -4,7 +4,6 @@ metadata:
   name: redis-server    
   namespace: yelb
 spec:
-  awsName: redis-server-virtual-node
   podSelector:
     matchLabels:
       app: redis-server
