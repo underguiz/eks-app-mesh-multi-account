@@ -216,32 +216,82 @@ Resources:
         Version: 2012-10-17
         Statement:
         - Effect: Allow
-          Action: ['servicediscovery:UpdateInstanceCustomHealthStatus']
+          Action: ['appmesh-preview:*']
+          Resource: '*'
+        - Effect: Allow
+          Action: ['servicediscovery:CreateService']
+          Resource: '*'
+        - Effect: Allow
+          Action: ['servicediscovery:DeleteService']
+          Resource: '*'
+        - Effect: Allow
+          Action: ['servicediscovery:GetService']
+          Resource: '*' 
+        - Effect: Allow
+          Action: ['servicediscovery:GetInstance']
+          Resource: '*' 
+        - Effect: Allow
+          Action: ['servicediscovery:RegisterInstance']
+          Resource: '*'
+        - Effect: Allow
+          Action: ['servicediscovery:DeregisterInstance']
+          Resource: '*'
+        - Effect: Allow
+          Action: ['servicediscovery:ListInstances']
+          Resource: '*'
+        - Effect: Allow
+          Action: ['servicediscovery:ListNamespaces']
+          Resource: '*' 
+        - Effect: Allow
+          Action: ['servicediscovery:ListServices']
+          Resource: '*' 
+        - Effect: Allow
+          Action: ['servicediscovery:GetOperation']
           Resource: '*'
         - Effect: Allow
           Action: ['servicediscovery:GetInstancesHealthStatus']
           Resource: '*'
         - Effect: Allow
-          Action: ['servicediscovery:GetOperation']
+          Action: ['servicediscovery:UpdateInstanceCustomHealthStatus']
           Resource: '*'
-
+        - Effect: Allow
+          Action: ['route53:GetHealthCheck']
+          Resource: '*' 
+        - Effect: Allow
+          Action: ['route53:CreateHealthCheck']
+          Resource: '*'
+        - Effect: Allow
+          Action: ['route53:UpdateHealthCheck']
+          Resource: '*' 
+        - Effect: Allow
+          Action: ['route53:ChangeResourceRecordSets']
+          Resource: '*' 
+        - Effect: Allow
+          Action: ['route53:DeleteHealthCheck']
+          Resource: '*' 
+  
   AppServerServiceDiscoveryNamespace:
-    Type: AWS::ServiceDiscovery::PrivateDnsNamespace
-    Properties:
+    Type: AWS::ServiceDiscovery::HttpNamespace
+    Properties: 
       Name: !Sub '${ProjectName}.local'
-      Vpc: !Ref VPC
 
-  BackendRegistry:
-    Type: AWS::ServiceDiscovery::Service
-    Properties:
-      Name: 'yelb-appserver'
-      DnsConfig:
-        NamespaceId: !Ref AppServerServiceDiscoveryNamespace
-        DnsRecords:
-        - Type: A
-          TTL: 300
-      HealthCheckCustomConfig:
-        FailureThreshold: 1
+  # AppServerServiceDiscoveryNamespace:
+  #   Type: AWS::ServiceDiscovery::PrivateDnsNamespace
+  #   Properties:
+  #     Name: !Sub '${ProjectName}.local'
+  #     Vpc: !Ref VPC
+
+  # BackendRegistry:
+  #   Type: AWS::ServiceDiscovery::Service
+  #   Properties:
+  #     Name: 'yelb-appserver'
+  #     DnsConfig:
+  #       NamespaceId: !Ref AppServerServiceDiscoveryNamespace
+  #       DnsRecords:
+  #       - Type: A
+  #         TTL: 300
+  #     HealthCheckCustomConfig:
+  #       FailureThreshold: 1
 
 Outputs:
 
