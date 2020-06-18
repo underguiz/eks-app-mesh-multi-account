@@ -11,6 +11,7 @@ PRIVSUB2_AZ=$(aws --profile secondary-vpcp ec2 describe-subnets --subnet-ids $PR
 PUBSUB1_AZ=$(aws --profile secondary-vpcp ec2 describe-subnets --subnet-ids $PUBSUB1_ID | jq -r .Subnets[].AvailabilityZone);
 PUBSUB2_AZ=$(aws --profile secondary-vpcp ec2 describe-subnets --subnet-ids $PUBSUB2_ID | jq -r .Subnets[].AvailabilityZone);
 NODES_IAM_POLICY=$(aws --profile secondary-vpcp cloudformation list-exports | jq -r '.Exports[] | select(.Name=="am-multi-account:NodesSDPolicy") | .Value');
+NODES_SECURITY_GROUP=$(aws --profile secondary-vpcp cloudformation list-exports | jq -r '.Exports[] | select(.Name=="am-multi-account:NodesSecurityGroup") | .Value');
 
 cat > /tmp/eks-2-configuration.yml <<-EKS_CONF
   apiVersion: eksctl.io/v1alpha5
@@ -34,6 +35,10 @@ cat > /tmp/eks-2-configuration.yml <<-EKS_CONF
       ssh: 
         allow: false
       privateNetworking: true
+      securityGroups:
+        withShared: true
+        withLocal: true
+        attachIDs: ['$NODES_SECURITY_GROUP']
       iam:
         attachPolicyARNs: 
           - $NODES_IAM_POLICY
