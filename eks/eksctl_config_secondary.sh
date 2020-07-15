@@ -19,6 +19,7 @@ cat > /tmp/eks-2-configuration.yml <<-EKS_CONF
   metadata:
     name: am-multi-account-2
     region: $AWS_REGION
+    version: "1.16"
   vpc:
     subnets:
       private:

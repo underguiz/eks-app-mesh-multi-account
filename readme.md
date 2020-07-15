@@ -67,18 +67,13 @@ kubectl config use-context gfvieira@am-multi-account-1.us-west-2.eksctl.io
 ```
 
 ```
-kubectl apply --validate=false -f \
-https://github.com/jetstack/cert-manager\
-/releases/download/v0.15.0/cert-manager.yaml
-
-kubectl -n cert-manager get pods
+helm repo add eks https://aws.github.io/eks-charts
 ```
 
 ```
-kubectl apply -f \
-https://raw.githubusercontent.com\
-/M00nF1sh/aws-app-mesh-controller-for-k8s\
-/v1beta2_bugbash/config/samples/deploy.yaml
+kubectl create ns appmesh-system
+helm upgrade -i appmesh-controller eks/appmesh-controller \
+--namespace appmesh-system
 
 kubectl -n appmesh-system get pods
 ```
@@ -113,18 +108,13 @@ kubectl config use-context gfvieira@am-multi-account-2.us-west-2.eksctl.io
 ```
 
 ```
-kubectl apply --validate=false -f \
-https://github.com/jetstack/cert-manager\
-/releases/download/v0.15.0/cert-manager.yaml
-
-kubectl -n cert-manager get pods
+helm repo add eks https://aws.github.io/eks-charts
 ```
 
 ```
-kubectl apply -f \
-https://raw.githubusercontent.com\
-/M00nF1sh/aws-app-mesh-controller-for-k8s\
-/v1beta2_bugbash/config/samples/deploy.yaml
+kubectl create ns appmesh-system
+helm upgrade -i appmesh-controller eks/appmesh-controller \
+--namespace appmesh-system
 
 kubectl -n appmesh-system get pods
 ```
@@ -166,6 +156,14 @@ kubectl apply -f mesh/yelb-ui.yaml
 
 ```
 kubectl apply -f yelb/resources_primary.yaml
+```
+
+## Create App Mesh Service Role
+
+```
+aws --profile primary-vpcp iam create-service-linked-role --aws-service-name appmesh.amazonaws.com
+
+aws --profile secondary-vpcp iam create-service-linked-role --aws-service-name appmesh.amazonaws.com
 ```
 
 
