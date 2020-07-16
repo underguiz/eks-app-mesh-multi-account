@@ -119,6 +119,12 @@ helm upgrade -i appmesh-controller eks/appmesh-controller \
 kubectl -n appmesh-system get pods
 ```
 
+## Create the App Mesh Service Role on our Secondary Account
+
+```
+aws --profile secondary-vpcp iam create-service-linked-role --aws-service-name appmesh.amazonaws.com
+```
+
 ## Deploy Mesh Resources on our Secondary Cluster
 
 ```
@@ -158,12 +164,6 @@ kubectl apply -f mesh/yelb-ui.yaml
 kubectl apply -f yelb/resources_primary.yaml
 ```
 
-## Create App Mesh Service Role
 
-```
-aws --profile primary-vpcp iam create-service-linked-role --aws-service-name appmesh.amazonaws.com
-
-aws --profile secondary-vpcp iam create-service-linked-role --aws-service-name appmesh.amazonaws.com
-```
 
 

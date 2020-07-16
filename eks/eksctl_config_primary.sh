@@ -41,8 +41,8 @@ cat > /tmp/eks-1-configuration.yml <<-EKS_CONF
           - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
           - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
           - arn:aws:iam::aws:policy/ElasticLoadBalancingFullAccess
+          - arn:aws:iam::aws:policy/AWSAppMeshFullAccess
         withAddonPolicies:
-          appMesh: true
           xRay: true
           cloudWatch: true
           externalDNS: true
