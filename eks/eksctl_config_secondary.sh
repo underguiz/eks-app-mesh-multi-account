@@ -54,4 +54,4 @@ cat > /tmp/eks-2-configuration.yml <<-EKS_CONF
 EKS_CONF
 
 # Create the EKS cluster
-eksctl create -p secondary-vpcp cluster -f /tmp/eks-2-configuration.yml
+eksctl create -p secondary cluster -f /tmp/eks-2-configuration.yml

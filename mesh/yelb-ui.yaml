@@ -16,7 +16,7 @@ spec:
       hostname: yelb-ui.yelb.svc.cluster.local
   backends:
     - virtualService:
-       virtualServiceARN: arn:aws:appmesh:us-west-2:167180785468:mesh/am-multi-account-mesh@876162455819/virtualService/yelb-appserver
+       virtualServiceARN: <yelb-appserver virtualServiceARN>
 
 ---
 apiVersion: appmesh.k8s.aws/v1beta2

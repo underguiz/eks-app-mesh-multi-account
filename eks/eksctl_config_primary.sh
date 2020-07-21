@@ -49,4 +49,4 @@ cat > /tmp/eks-1-configuration.yml <<-EKS_CONF
 EKS_CONF
 
 # Create the EKS cluster
-eksctl create -p primary-vpcp cluster -f /tmp/eks-1-configuration.yml
+eksctl create -p primary cluster -f /tmp/eks-1-configuration.yml
