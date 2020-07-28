@@ -2,15 +2,16 @@
 
 # Create a ClusterConfig file
 AWS_REGION="us-west-2"
-PRIVSUB1_ID=$(aws --profile primary cloudformation list-exports | jq -r '.Exports[] | select(.Name=="am-multi-account:PrivateSubnet1") | .Value');
-PRIVSUB2_ID=$(aws --profile primary cloudformation list-exports | jq -r '.Exports[] | select(.Name=="am-multi-account:PrivateSubnet2") | .Value');
-PUBSUB1_ID=$(aws --profile primary cloudformation list-exports | jq -r '.Exports[] | select(.Name=="am-multi-account:PublicSubnet1") | .Value');
-PUBSUB2_ID=$(aws --profile primary cloudformation list-exports | jq -r '.Exports[] | select(.Name=="am-multi-account:PublicSubnet2") | .Value');
-PRIVSUB1_AZ=$(aws --profile secondary ec2 describe-subnets --subnet-ids $PRIVSUB1_ID | jq -r .Subnets[].AvailabilityZone);
-PRIVSUB2_AZ=$(aws --profile secondary ec2 describe-subnets --subnet-ids $PRIVSUB2_ID | jq -r .Subnets[].AvailabilityZone);
-PUBSUB1_AZ=$(aws --profile secondary ec2 describe-subnets --subnet-ids $PUBSUB1_ID | jq -r .Subnets[].AvailabilityZone);
-PUBSUB2_AZ=$(aws --profile secondary ec2 describe-subnets --subnet-ids $PUBSUB2_ID | jq -r .Subnets[].AvailabilityZone);
-NODES_IAM_POLICY=$(aws --profile secondary cloudformation list-exports | jq -r '.Exports[] | select(.Name=="am-multi-account:NodesSDPolicy") | .Value');
+PRIVSUB1_ID=$(aws --profile secondary-vpcp cloudformation list-exports | jq -r '.Exports[] | select(.Name=="am-multi-account:PrivateSubnet1") | .Value');
+PRIVSUB2_ID=$(aws --profile secondary-vpcp cloudformation list-exports | jq -r '.Exports[] | select(.Name=="am-multi-account:PrivateSubnet2") | .Value');
+PUBSUB1_ID=$(aws --profile secondary-vpcp cloudformation list-exports | jq -r '.Exports[] | select(.Name=="am-multi-account:PublicSubnet1") | .Value');
+PUBSUB2_ID=$(aws --profile secondary-vpcp cloudformation list-exports | jq -r '.Exports[] | select(.Name=="am-multi-account:PublicSubnet2") | .Value');
+PRIVSUB1_AZ=$(aws --profile secondary-vpcp ec2 describe-subnets --subnet-ids $PRIVSUB1_ID | jq -r .Subnets[].AvailabilityZone);
+PRIVSUB2_AZ=$(aws --profile secondary-vpcp ec2 describe-subnets --subnet-ids $PRIVSUB2_ID | jq -r .Subnets[].AvailabilityZone);
+PUBSUB1_AZ=$(aws --profile secondary-vpcp ec2 describe-subnets --subnet-ids $PUBSUB1_ID | jq -r .Subnets[].AvailabilityZone);
+PUBSUB2_AZ=$(aws --profile secondary-vpcp ec2 describe-subnets --subnet-ids $PUBSUB2_ID | jq -r .Subnets[].AvailabilityZone);
+NODES_IAM_POLICY=$(aws --profile secondary-vpcp cloudformation list-exports | jq -r '.Exports[] | select(.Name=="am-multi-account:NodesSDPolicy") | .Value');
+NODES_SECURITY_GROUP=$(aws --profile secondary-vpcp cloudformation list-exports | jq -r '.Exports[] | select(.Name=="am-multi-account:NodesSecurityGroup") | .Value');
 
 cat > /tmp/eks-2-configuration.yml <<-EKS_CONF
   apiVersion: eksctl.io/v1alpha5
@@ -18,6 +19,7 @@ cat > /tmp/eks-2-configuration.yml <<-EKS_CONF
   metadata:
     name: am-multi-account-2
     region: $AWS_REGION
+    version: "1.16"
   vpc:
     subnets:
       private:
@@ -34,14 +36,18 @@ cat > /tmp/eks-2-configuration.yml <<-EKS_CONF
       ssh: 
         allow: false
       privateNetworking: true
+      securityGroups:
+        withShared: true
+        withLocal: true
+        attachIDs: ['$NODES_SECURITY_GROUP']
       iam:
         attachPolicyARNs: 
           - $NODES_IAM_POLICY
           - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
           - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
           - arn:aws:iam::aws:policy/ElasticLoadBalancingFullAccess
+          - arn:aws:iam::aws:policy/AWSAppMeshFullAccess
         withAddonPolicies:
-          appMesh: true
           xRay: true
           cloudWatch: true
           externalDNS: true

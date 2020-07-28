@@ -1,0 +1,34 @@
+Parameters:
+  ProjectName:
+    Type: String
+    Description: Project name to link stacks
+    Default: am-multi-account
+
+  PeerPrivateSubnet1CIDR:
+    Type: String
+    Default: 10.193.20.0/24
+
+  PeerPrivateSubnet2CIDR:
+    Type: String
+    Default: 10.193.21.0/24
+  
+  VPCPeeringConnectionId:
+    Type: String
+
+Resources:
+
+  DefaultPrivateRoute1:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Fn::ImportValue: !Sub '${ProjectName}:PrivateRouteTable1'
+      DestinationCidrBlock: !Ref PeerPrivateSubnet1CIDR
+      VpcPeeringConnectionId: !Ref VPCPeeringConnectionId
+
+  DefaultPrivateRoute2:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId:
+        Fn::ImportValue: !Sub '${ProjectName}:PrivateRouteTable2'
+      DestinationCidrBlock: !Ref PeerPrivateSubnet2CIDR
+      VpcPeeringConnectionId: !Ref VPCPeeringConnectionId
