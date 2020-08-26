@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MESH_OWNER=$(aws --profile primary-vpcp sts get-caller-identity | jq -r .Account)
+MESH_OWNER=$(aws --profile primary sts get-caller-identity | jq -r .Account)
 
 cat > /tmp/app-mesh.yml <<-EKS_CONF
   apiVersion: appmesh.k8s.aws/v1beta2
