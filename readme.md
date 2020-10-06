@@ -1,4 +1,4 @@
-## Configure Primary and Secondary Account Profiles
+## Configure Frontend and Backend Account Profiles
 
 ```
 cat ~/.aws/credentials
@@ -6,64 +6,39 @@ cat ~/.aws/credentials
 [default]
 aws_access_key_id =  ...
 aws_secret_access_key = ...
-[primary]
+[frontend]
 aws_access_key_id =  ...
 aws_secret_access_key = ...
-[secondary]
+[backend]
 aws_access_key_id = ...
 aws_secret_access_key = ...
+
+cat ~/.aws/config
+
+[default]
+region = sa-east-1
+[profile frontend]
+region = us-west-2
+[profile backend]
+region = us-west-2
 ```
 
 ## Deploy the Infrastructure
 
 ```
-aws --profile primary cloudformation deploy \
---template-file infrastructure/infrastructure_primary.yaml \
---parameter-overrides \
-"SecondaryAccountId=$(aws --profile secondary sts get-caller-identity | jq -r .Account)" \
---stack-name am-multi-account-infra \
---capabilities CAPABILITY_IAM
+./infrasctucture/setup.sh
 ```
-
-```
-aws --profile secondary cloudformation deploy \
---template-file infrastructure/infrastructure_secondary.yaml \
---parameter-overrides \
-"PrimaryAccountId=$(aws --profile primary sts get-caller-identity | jq -r .Account)" \
-"PeerVPCId=$(aws --profile primary cloudformation list-exports | jq -r '.Exports[] | select(.Name=="am-multi-account:VPC") | .Value')" \
-"PeerRoleArn=$(aws --profile primary cloudformation list-exports | jq -r '.Exports[] | select(.Name=="am-multi-account:VPCPeerRole") | .Value')" \
---stack-name am-multi-account-infra \
---capabilities CAPABILITY_IAM
-```
-
-```
-aws --profile primary cloudformation deploy \
---template-file infrastructure/primary_vpc_peering_routes.yaml \
---parameter-overrides \
-"VPCPeeringConnectionId=$(aws --profile secondary cloudformation list-exports | jq -r '.Exports[] | select(.Name=="am-multi-account:VPCPeeringConnectionId") | .Value')" \
---stack-name am-multi-account-routes \
---capabilities CAPABILITY_IAM
-```
-
-```
-aws --profile secondary cloudformation deploy \
---template-file infrastructure/secondary_vpc_peering_routes.yaml \
---stack-name am-multi-account-routes \
---capabilities CAPABILITY_IAM
-```
-
 
 ## Deploy EKS
 
 ```
-./eks/eksctl_config_primary.sh
-./eks/eksctl_config_secondary.sh
+./eks/setup.sh
 ```
 
-## Deploy the App Mesh Controller on our Primary Cluster
+## Deploy the App Mesh Controller on our Frontend Cluster
 
 ```
-kubectl config use-context gfvieira@am-multi-account-1.us-west-2.eksctl.io
+kubectl config use-context <iam_user>@am-multi-account-1.<region>.eksctl.io
 ```
 
 ```
@@ -91,20 +66,27 @@ kubectl label namespace yelb "appmesh.k8s.aws/sidecarInjectorWebhook"=enabled
 ```
 
 ```
-aws --profile primary cloudformation deploy \
+aws --profile frontend cloudformation deploy \
 --template-file shared_resources/shared_mesh.yaml \
 --parameter-overrides \
-"SecondaryAccountId=$(aws --profile secondary sts get-caller-identity | jq -r .Account)" \
+"BackendAccountId=$(aws --profile backend sts get-caller-identity | jq -r .Account)" \
 --stack-name am-multi-account-shared-mesh \
 --capabilities CAPABILITY_IAM
 ```
 
-_Accept Resource Share Invitation Steps._
-
-## Deploy the App Mesh Controller on our Secondary Cluster
+## Accept the invitation
 
 ```
-kubectl config use-context gfvieira@am-multi-account-2.us-west-2.eksctl.io
+aws —profile backend ram get-resource-share-invitations 
+
+aws —profile backend ram accept-resource-share-invitation \
+--resource-share-invitation-arn <value from previous command>
+```
+
+## Deploy the App Mesh Controller on our Backend Cluster
+
+```
+kubectl config use-context <iam_user@am-multi-account-2.<region>.eksctl.io
 ```
 
 ```
@@ -119,13 +101,13 @@ helm upgrade -i appmesh-controller eks/appmesh-controller \
 kubectl -n appmesh-system get pods
 ```
 
-## Create the App Mesh Service Role on our Secondary Account
+## Create the App Mesh Service Role on our Backend Account
 
 ```
-aws --profile secondary iam create-service-linked-role --aws-service-name appmesh.amazonaws.com
+aws --profile backend iam create-service-linked-role --aws-service-name appmesh.amazonaws.com
 ```
 
-## Deploy Mesh Resources on our Secondary Cluster
+## Deploy Mesh Resources on our Backend Cluster
 
 ```
 kubectl create ns yelb
@@ -142,22 +124,22 @@ kubectl apply -f mesh/yelb-db.yaml
 kubectl apply -f mesh/yelb-appserver.yaml
 ```
 
-## Deploy Yelb Resources on our Secondary Cluster
+## Deploy Yelb Resources on our Backend Cluster
 
 ```
-kubectl apply -f yelb/resources_secondary.yaml
+kubectl apply -f yelb/resources_backend.yaml
 ```
 
 ## Deploy Mesh Resources on our Primary Cluster
 
 ```
-kubectl config use-context gfvieira@am-multi-account-1.us-west-2.eksctl.io
+kubectl config use-context <iam_user>@am-multi-account-1.<region>.eksctl.io
 ```
 
 Get the ```yelb-appserver``` VirtualService ARN and change ```mesh/yelb-ui.yaml``` accordingly. 
 
 ```
-kubectl --context=gfvieira@am-multi-account-2.us-west-2.eksctl.io \
+kubectl --context=<iam_user>@am-multi-account-2.<region>.eksctl.io \
 -n yelb get virtualservice yelb-appserver
 ```
 
@@ -165,12 +147,14 @@ kubectl --context=gfvieira@am-multi-account-2.us-west-2.eksctl.io \
 kubectl apply -f mesh/yelb-ui.yaml
 ```
 
-## Deploy Yelb Resources on our Primary Cluster
+## Deploy Yelb Resources on our Frontend Cluster
 
 ```
-kubectl apply -f yelb/resources_primary.yaml
+kubectl apply -f yelb/resources_frontend.yaml
 ```
 
+## Cleanup
 
-
-
+```
+./cleanup.sh
+```

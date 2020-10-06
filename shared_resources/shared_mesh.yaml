@@ -3,7 +3,7 @@ Parameters:
     Type: String
     Description: Project name to link stacks
     Default: am-multi-account
-  SecondaryAccountId:
+  BackendAccountId:
     Type: String
     Description: Account Id to share resources with
 
@@ -14,6 +14,6 @@ Resources:
       AllowExternalPrincipals: true
       Name: mesh-share
       Principals:
-        - !Ref SecondaryAccountId
+        - !Ref BackendAccountId
       ResourceArns:
          - !Sub 'arn:aws:appmesh:${AWS::Region}:${AWS::AccountId}:mesh/${ProjectName}-mesh'
