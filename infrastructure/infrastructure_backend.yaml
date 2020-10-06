@@ -29,7 +29,7 @@ Parameters:
     Type: String
     Default: 10.193.21.0/24
 
-  PrimaryAccountId:
+  FrontendAccountId:
     Type: String
 
   PeerVPCId:
@@ -204,8 +204,8 @@ Resources:
   NodesSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties: 
-      GroupDescription: Allow traffic from primary EKS
-      GroupName: primary-eks-rules
+      GroupDescription: Allow traffic from frontend EKS
+      GroupName: frontend-eks-rules
       SecurityGroupIngress: 
       - IpProtocol: "-1"
         CidrIp: "10.192.0.0/16"
@@ -216,7 +216,7 @@ Resources:
     Properties:
       VpcId: !Ref VPC
       PeerVpcId: !Ref PeerVPCId
-      PeerOwnerId: !Ref PrimaryAccountId
+      PeerOwnerId: !Ref FrontendAccountId
       PeerRoleArn: !Ref PeerRoleArn
 
   NodesSDPolicy:

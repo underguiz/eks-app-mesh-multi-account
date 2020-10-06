@@ -34,7 +34,7 @@ Parameters:
     Type: String
     Default: 10.192.21.0/24
 
-  SecondaryAccountId:
+  BackendAccountId:
     Type: String
 
 Resources:
@@ -216,7 +216,7 @@ Resources:
       AssumeRolePolicyDocument:
         Statement:
           - Principal:
-              AWS: !Ref SecondaryAccountId
+              AWS: !Ref BackendAccountId
             Action:
               - 'sts:AssumeRole'
             Effect: Allow
